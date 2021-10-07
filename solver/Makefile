@@ -2,11 +2,11 @@
 
 CPPFLAGS = -MMD
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2
-LDFLAGS =
+CFLAGS = -Wall -Wextra -std=c99 -O2 -fsanitize=address -g
+LDFLAGS = -fsanitize=address
 LDLIBS = 
 
-SRC = solver.c solveralgo.c
+SRC = solver.c solveralgo.c parser.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
