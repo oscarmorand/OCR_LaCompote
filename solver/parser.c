@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <err.h>
 
-void Parse(char *fileName, int grid[][9])
+void Parse(char *fileName, char grid[][9])
 {
     FILE *filePtr = NULL;
 
@@ -13,7 +13,8 @@ void Parse(char *fileName, int grid[][9])
     }
 
     //Fill grid
-    int c, value, i = 0, j = 0;
+    char c, value;
+    int i = 0, j = 0;
     for(int column = 0; column < 11; column ++) {
         j = 0;
         if (column != 3 && column != 7) {
@@ -21,8 +22,8 @@ void Parse(char *fileName, int grid[][9])
                 c = fgetc(filePtr);
                 if(line != 3 && line != 7) {
                     value = 0;
-                    if (c >= (int)'0' && c <= (int)'9')
-                        value = c - (int)'0';
+                    if (c >= (char)'0' && c <= (char)'9')
+                        value = c - (char)'0';
                     grid[i][j] = value;
                     j = j + 1;
                 }

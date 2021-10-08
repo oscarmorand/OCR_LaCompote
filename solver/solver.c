@@ -6,14 +6,14 @@
 #include "parser.h"
 
 
-void PrintGrid(int size, int grid[9][9])
+void PrintGrid(int size, char grid[][9])
 {
     int i,j;
     for(i = 0; i < size; i++){
         for(j = 0; j < size; j++){
             if(j%3 == 0)
                 printf("  ");
-            printf("%i ", grid[i][j]);
+            printf("%hhu ", grid[i][j]);
         }
         printf("\n");
         if((i+1)%3 == 0)
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     }
     fileName = argv[1];
 
-    int grid[9][9] = 
+    char grid[9][9] = 
     {
         {0,0,0,0,0,0,0,0,0},
         {0,0,0,0,0,0,0,0,0},
@@ -59,6 +59,12 @@ int main(int argc, char *argv[])
     Parse(fileName,grid);
 
     printf("Apres remplissage:\n");
+    PrintGrid(size, grid);
+
+    //Solving
+    Solve(grid);
+
+    printf("Apres resolution\n");
     PrintGrid(size, grid);
 
     return 0;
