@@ -3,83 +3,33 @@
 #include <err.h> 
 #include <math.h>
 
-typedef struct neuron_t
-{
-	float actv;
-	float* outWeights;
-	float bias;
-	float z;
-
-	float dactv;
-	float *dw;
-	float dbias;
-	float dz;
-  
-} Neuron;
-
-typedef struct layer_t
-{
-    int nbrNeu;
-    struct neuron_t* neurons;
-} Layer;
-
-typedef struct neuraln_t
-{
-    int nbrLayers;
-    int* nbrNeurons;
-    struct layer_t* layers;
-} NeuralN;
-
-void PrintNN(NeuralN neuralN) 
-{
-    int* nbrNeurons = neuralN.nbrNeurons;
-    int nbrLayers = neuralN.nbrLayers;
-    Layer* layers = neuralN.layers;
-
-    printf("Input Layer\n");
-    for (int j = 0; j < nbrNeurons[0]; j++)
-    {
-        printf("  i%i: %f, %f  ", j, layers[0].neurons[j].actv, layers[0].neurons[j].bias);
-    }
-    printf("\nHidden Layer\n");
-    for (int i = 1; i < nbrLayers-1; i++)
-    {
-        for (int j = 0; j < nbrNeurons[i]; j++)
-            printf("  h%i%i: %f, %f  ", i, j, layers[i].neurons[j].actv, layers[i].neurons[j].bias);
-    }
-    printf("\nOutput Layer\n");
-    for (int j = 0; j < nbrNeurons[nbrLayers-1]; j++)
-    {
-        printf("  o%i: %f, %f  ", j, layers[nbrLayers-1].neurons[j].actv, layers[nbrLayers-1].neurons[j].bias);
-    }
-    printf("\n");
-}
+#include "structsNN.h"
 
 
 // Return a random weight between 0.0 and 1.0
 float rndWeight() {return ((float)rand()) / ((float)RAND_MAX); }
 
-void InitWeights(NeuralN* neuralNP) 
+void InitWeights(NN* nNp) 
 {
-    NeuralN neuralN = *neuralNP;
+    NN nN = *nNp;
 
     int i, j, k;
-    for (i = 0; i < neuralN.nbrLayers-1; i++)
+    for (i = 0; i < nN.nbLay-1; i++)
     {
-        for (j = 0; j < neuralN.nbrNeurons[i]; j++)
+        for (j = 0; j < nN.nbNeus[i]; j++)
         {
-            for (k = 0; k < neuralN.nbrNeurons[i+1]; k++)
-                neuralN.layers[i].neurons[j].outWeights[k] = rndWeight();
+            for (k = 0; k < nN.nbNeus[i+1]; k++)
+                nN.lays[i].neus[j].outWeights[k] = rndWeight();
         }
     }
 }
 
 
-Neuron CreateNeuron(int nbrWeights) 
+Neu CreateNeuron(int nbrWeights) 
 {
-    Neuron neuron;
+    Neu neuron;
 
-    neuron.z = 0.0f;
+    neuron.v = 0.0f;
     neuron.actv = 0.0f;
     neuron.bias = 0.0f;
     neuron.outWeights = (float*) malloc(nbrWeights * sizeof(float));
@@ -87,64 +37,64 @@ Neuron CreateNeuron(int nbrWeights)
     return neuron;
 }
 
-Layer CreateLayer(int nbrNeurons) 
+Lay CreateLayer(int nbNeus) 
 {
-    Layer layer;
+    Lay layer;
 
-    layer.nbrNeu = nbrNeurons;
-    layer.neurons = (Neuron*) malloc(nbrNeurons * sizeof(Neuron));
+    layer.nbNeu = nbNeus;
+    layer.neus = (Neu*) malloc(nbNeus * sizeof(Neu));
 
     return layer;
 }
 
-NeuralN CreateNN(int nbrLayers, int nbrNeurons[]) 
+NN CreateNN(int nbLay, int nbNeus[]) 
 {
-    NeuralN neuralN;
+    NN nN;
 
-    neuralN.nbrLayers = nbrLayers;
-    neuralN.nbrNeurons = (int*) malloc(sizeof(nbrNeurons) * sizeof(int));
-    neuralN.layers = (Layer*) malloc(nbrLayers * sizeof(Layer));
+    nN.nbLay = nbLay;
+    nN.nbNeus = (int*) malloc(sizeof(nbNeus) * sizeof(int));
+    nN.lays = (Lay*) malloc(nbLay * sizeof(Lay));
 
     int i=0, j=0;
-    for (i = 0; i < nbrLayers; i++)
+    for (i = 0; i < nbLay; i++)
     {
-        neuralN.nbrNeurons[i] = nbrNeurons[i];
-        neuralN.layers[i] = CreateLayer(nbrNeurons[i]);
+        nN.nbNeus[i] = nbNeus[i];
+        nN.lays[i] = CreateLayer(nbNeus[i]);
 
-        printf("Created Layer number %i\n", i+1);
-        printf("Number of Neurons in Layer %i: %i\n", i+1, neuralN.layers[i].nbrNeu);
+        printf("Created layer number %i\n", i+1);
+        printf("Number of Neurons in layer %i: %i\n", i+1, nN.lays[i].nbNeu);
 
-        for (j = 0; j < nbrNeurons[i]; j++)
+        for (j = 0; j < nbNeus[i]; j++)
         {
-            if(i < nbrLayers-1) 
-                neuralN.layers[i].neurons[j] = CreateNeuron(nbrNeurons[i+1]);
+            if(i < nbLay-1) 
+                nN.lays[i].neus[j] = CreateNeuron(nbNeus[i+1]);
             else
-                neuralN.layers[i].neurons[j] = CreateNeuron(0);
+                nN.lays[i].neus[j] = CreateNeuron(0);
 
-            printf("Neuron %i in Layer %i created\n", j+1, i+1);
+            printf("Neuron %i in layer %i created\n", j+1, i+1);
         }
         printf("\n"); 
     }
     printf("\n");
 
-    InitWeights(&neuralN);
+    InitWeights(&nN);
 
-    return neuralN;
+    return nN;
 }
 
-void DestroyNN(NeuralN* neuralNP) 
+void DestroyNN(NN* nNp) 
 {
-    NeuralN neuralN = *neuralNP;
-    for (int i = 0; i < neuralN.nbrLayers; i++)
+    NN nN = *nNp;
+    for (int i = 0; i < nN.nbLay; i++)
     {
-        for (int j = 0; j < neuralN.nbrNeurons[i]; j++)
+        for (int j = 0; j < nN.nbNeus[i]; j++)
         {
-            free(neuralN.layers[i].neurons[j].outWeights);
+            free(nN.lays[i].neus[j].outWeights);
         }
-        free(neuralN.layers[i].neurons);
+        free(nN.lays[i].neus);
     }
-    free(neuralN.layers);
-    free(neuralN.nbrNeurons);
+    free(nN.lays);
+    free(nN.nbNeus);
 }
 
 
@@ -159,31 +109,35 @@ float Relu(float x) {
     return x;
 }
 
-void ForwardProp(Layer* layers, int nbrLayers, int nbrNeurons[])
+
+void ForwardProp(NN* nNp)
 {
+    NN nN = *nNp;
+    int* nbNeus = nN.nbNeus;
+    int nbLay = nN.nbLay;
+
     int i,j,k;
 
-    for (i = 1; i < nbrLayers; i++)                                 // for each layers except the input layer which hasn't a previous layer
+    for (i = 1; i < nbLay; i++)                                         // for each layer except the input layer which hasn't a previous layer
     {
-        for (j = 0; j < nbrNeurons[i]; j++)                         // for each neurons in the layer
+        for (j = 0; j < nbNeus[i]; j++)                                 // for each neurons in the layer
         {
-            layers[i].neurons[j].z = layers[i].neurons[j].bias;     // first term of the formula is the biais
+            nN.lays[i].neus[j].v = nN.lays[i].neus[j].bias;             // first term of the formula is the biais
 
-            for (k = 0; k < nbrNeurons[i-1]; k++)                   // for each neuron of the previous layer
+            for (k = 0; k < nbNeus[i-1]; k++)                           // for each neuron of the previous layer
             {
-                layers[i].neurons[j].z = layers[i].neurons[j].z + ((layers[i-1].neurons[k].outWeights[j]) * (layers[i-1].neurons[k].actv));
-                //layers[i].neurons[j].z += ((layers[i-1].neurons[k].outWeights[j]) * (layers[i-1].neurons[k].actv));
+                // add to the value the activated value of the previous neuron multiplicated by the weight of the connection
+                nN.lays[i].neus[j].v += ((nN.lays[i-1].neus[k].outWeights[j]) * (nN.lays[i-1].neus[k].actv));
             }
             
             // Relu activation function for hidden layers
-            if(i < nbrLayers - 1) {
-                layers[i].neurons[j].actv = Relu(layers[i].neurons[j].z);
+            if(i < nbLay - 1) {
+                nN.lays[i].neus[j].actv = Relu(nN.lays[i].neus[j].v);
             }
 
             // Sigmoid activation function for output layer
             else {
-                layers[i].neurons[j].actv = Sigmoid(layers[i].neurons[j].z);
-                printf("OUTPUT: %d\n", (int)round(layers[i].neurons[j].actv));
+                nN.lays[i].neus[j].actv = Sigmoid(nN.lays[i].neus[j].v);
             }
         }
     }
