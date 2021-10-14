@@ -6,17 +6,17 @@
 #include <math.h>
 
 #include "arrayaux.h"
+#include "neuralnetwork.h"
 
 #define NUM_INPUT 2
 #define NUM_HIDDEN 2
 #define NUM_OUTPUT 1
+#define NUM_HLAYERS 1
 #define NUM_TRAINING_SET 4
 
+/*
 // Activation function
 double sigmoid(double x) { return (1 / (1 + exp(-x))); }
-
-// Return a random weight between 0.0 and 1.0
-double rndWeight() {return ((double)rand()) / ((double)RAND_MAX); }
 
 
 void PrintNN(double inputLayer[NUM_INPUT], double hiddenLayer[NUM_HIDDEN], double outputLayer[NUM_OUTPUT]) 
@@ -47,12 +47,12 @@ void Calculate_OutputLayer()
 
 void Calculate_HiddenLayer()
 {
-	/*for (int j=0; j<numHiddenNodes; j++) {
+	for (int j=0; j<numHiddenNodes; j++) {
 		double activation = hiddenLayerBias[j];
 		for (int k=0; k<numInputs; k++) {
 			activation += training_inputs[
 		}
-        }*/
+        }
 }
 
 void Calculate_Output() 
@@ -141,4 +141,15 @@ int main(int argc, char *argv[])
 			errx(1,"protoNN/testNN.c : one or more parameters are not recognized, please enter '-train x' with x the number of iterations or 'a b' with a and b two binary numbers\n");
 		}
 	}
+}*/
+
+int main()
+{
+	int nbrLayers = 3;
+	int nbrNeurones[] = {2,2,1};
+	NeuralN neuralN = CreateNN(nbrLayers, nbrNeurones);
+	PrintNN(neuralN);
+
+	DestroyNN(&neuralN);
+	
 }
