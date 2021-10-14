@@ -48,7 +48,7 @@ int RecSolve(int line, int col, int empty, char grid[][9])
     char nextCol = col+ 1;
     char nextLine = line;
 
-    if(nextCol >= 9) {                                                  // if we are at the end of the line                       
+    if(nextCol >= 9) {                                                              // if we are at the end of the line                       
         nextLine = line + 1;                                                        // we go to the next line
         nextCol = 0;
     }
