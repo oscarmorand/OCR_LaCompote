@@ -7,6 +7,8 @@
 float rndWeight();
 void InitWeights(NN* nNp);
 
+void InitInputs(NN* nNp, float* inputs);
+
 Neu CreateNeuron(int nbrWeights);
 
 Lay CreateLayer(int nbNeus);
@@ -20,5 +22,10 @@ float Sigmoid(float x);
 float Relu(float x);
 
 void ForwardProp(NN* nNp);
+
+void BackwardProp(NN* nNp, float* expOut);
+
+void RandShuffle(int *array, int size);
+void Train(NN* nNp, int nbTraining);
 
 #endif

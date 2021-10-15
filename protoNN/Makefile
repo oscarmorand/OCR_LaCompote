@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -std=c99 -O2 -fsanitize=address -g
 LDFLAGS = -fsanitize=address
 LDLIBS = -lm
 
-SRC = testNN.c neuralnetwork.c printNN.c
+SRC = testNN.c neuralnetwork.c printNN.c saveandload.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 

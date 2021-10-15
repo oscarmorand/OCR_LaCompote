@@ -24,6 +24,15 @@ void InitWeights(NN* nNp)
     }
 }
 
+void InitInputs(NN* nNp, float* inputs) 
+{
+    NN nN = *nNp;
+    for (int i = 0; i < nN.lays[0].nbNeu; i++)
+    {
+        nN.lays[0].neus[i].actv = inputs[i];
+    }
+}
+
 
 Neu CreateNeuron(int nbrWeights) 
 {
@@ -140,5 +149,66 @@ void ForwardProp(NN* nNp)
                 nN.lays[i].neus[j].actv = Sigmoid(nN.lays[i].neus[j].v);
             }
         }
+    }
+}
+
+void BackwardProp(NN* nNp, float* expOut)
+{
+    NN nN = *nNp;
+    int* nbNeus = nN.nbNeus;
+    int nbLay = nN.nbLay;
+
+    int i,j,k;
+
+    for (j = 0; j < nbNeus[nbLay-1]; j++)
+    {
+        //nNp.lays[nbLay-1].neus[j].dz = ()
+        printf("output n°%i, le resultat est %.2f et devrait etre %.2f\n",j, nN.lays[nbLay-1].neus[j].actv, expOut[j]);
+    }
+    
+}
+
+
+void RandShuffle(int *array, int size)
+{
+    if (size > 1) 
+    {
+        for (int i = 0; i < size - 1; i++) 
+        {
+          int j = i + rand() / (RAND_MAX / (size - i) + 1);
+          int t = array[j];
+          array[j] = array[i];
+          array[i] = t;
+        }
+    }
+}
+
+void Train(NN* nNp, int nbTraining) 
+{
+    float tInputsSet[4][2] = {{0.0f,0.0f},{0.0f,1.0f},{1.0f,0.0f},{1.0f,1.0f}};
+    float tOutputsSet[4][1] = {{0.0f},{1.0f},{1.0f},{0.0f}};
+
+    for (int train = 0; train < nbTraining; train++)
+    {
+        printf("Training number %i\n", train);
+        int trainingOrder[4] = {0,1,2,3};
+        RandShuffle(trainingOrder, 4);
+
+        for (int j = 0; j < 4; j++)
+        {
+            int i = trainingOrder[j];
+            float* tInputs = tInputsSet[i];
+            float* tOutput = tOutputsSet[i];
+
+            printf(" %i -> inputs are %.2f and %.2f\n", j, tInputs[0], tInputs[1]);
+
+            InitInputs(nNp, tInputs);
+
+            ForwardProp(nNp);
+
+            BackwardProp(nNp, tOutput);
+        }
+
+        printf("\n");
     }
 }
