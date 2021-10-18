@@ -16,18 +16,17 @@ int main()
 	NN nN = CreateNN(nbrLayers, nbrNeurones);
 	PrintNN(nN);
 
-	/*nN.lays[0].neus[0].actv = 1.0f;
-	nN.lays[0].neus[1].actv = 0.0f;
-	ForwardProp(&nN);
-
-	PrintNN(nN);
-
-	printf("OUTPUT: %d\n\n", (int)round(nN.lays[2].neus[0].actv));*/
-
 	Train(&nN,2);
 
 	Save(&nN, NULL);
+	PrintNN(nN);
+
+	NN nN2 = Load(NULL);
+	PrintNN(nN2);
+
+	Save(&nN2, "savedNN2.txt");
 
 	DestroyNN(&nN);
+	DestroyNN(&nN2);
 
 }
