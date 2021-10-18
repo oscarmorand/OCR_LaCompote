@@ -71,7 +71,7 @@ void wait_for_keypressed()
 /* free the allocated memory */
 void SDL_FreeSurface(SDL_Surface *surface);
 
-int main()
+/*int main()
 {
     SDL_Surface* image_surface;
     SDL_Surface* screen_surface;
@@ -87,4 +87,4 @@ int main()
     SDL_FreeSurface(screen_surface);
 
     return 0;
-}
+}*/
