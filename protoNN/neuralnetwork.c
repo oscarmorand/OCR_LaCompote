@@ -61,7 +61,7 @@ NN CreateNN(int nbLay, int nbNeus[])
     NN nN;
 
     nN.nbLay = nbLay;
-    nN.nbNeus = (int*) malloc(sizeof(nbNeus) * sizeof(int));
+    nN.nbNeus = (int*) malloc(nbLay * sizeof(int));
     nN.lays = (Lay*) malloc(nbLay * sizeof(Lay));
 
     int i=0, j=0;
