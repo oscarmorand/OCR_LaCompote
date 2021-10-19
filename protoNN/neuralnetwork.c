@@ -263,6 +263,7 @@ void Train(NN* nNp, int nbTraining, float learningRate)
     float tInputsSet[4][2] = {{0.0f,0.0f},{0.0f,1.0f},{1.0f,0.0f},{1.0f,1.0f}};
     float tOutputsSet[4][1] = {{0.0f},{1.0f},{1.0f},{0.0f}};
     int nbWin = 0;
+    int nbTot = 0;
     int train, j;
 
     for (train = 0; train < nbTraining; train++)
@@ -284,6 +285,7 @@ void Train(NN* nNp, int nbTraining, float learningRate)
             ForwardProp(nNp);
 
             nbWin += TestResults(nNp, tOutputs);
+            nbTot += 1;
 
             BackwardProp(nNp, tOutputs);
             UpdateWeights(nNp, learningRate);
@@ -291,6 +293,6 @@ void Train(NN* nNp, int nbTraining, float learningRate)
             //printf("\n");
         }
     }
-    float winPercentage = (((float)nbWin) / ((float)(train*4 + j + 1))) * 100.0f;
+    float winPercentage = (((float)nbWin) / ((float)nbTot)) * 100.0f;
     printf("Percentage of good predictions: %.3f%%\n", winPercentage);
 }
