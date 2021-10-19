@@ -8,11 +8,11 @@
 #include "neuralnetwork.h"
 
 #define NDECDIGITS 5
-#define NDIGITS 2
+#define NDIGITS 3
 
 void PutFloatFP(float x, FILE* fp) 
 {
-    char* s = (char*) malloc((NDIGITS  +NDECDIGITS + 2) * sizeof(char));
+    char* s = (char*) malloc((NDIGITS  + NDECDIGITS + 3) * sizeof(char));
 
     sprintf(s, "%.5f", x);
     strcat(s, ",");
@@ -45,11 +45,12 @@ void Save(NN* nNp, char* path)
     }
 
     NN nN = *nNp;
+    int nbLay = nN.nbLay;
 
     // Save number of layer and number of neurons in each layer
-    PutIntFP(nN.nbLay,fp);
+    PutIntFP(nbLay,fp);
     fputc((char)'\n',fp);
-    for (int i = 0; i < nN.nbLay; i++)
+    for (int i = 0; i < nbLay; i++)
     {
         PutIntFP(nN.nbNeus[i], fp);
     }
@@ -57,7 +58,7 @@ void Save(NN* nNp, char* path)
     fputc((char)'\n',fp);
     
     // Save input and hidden layers with biais and all outweights
-    for (int i = 0; i < nN.nbLay-1; i++)
+    for (int i = 0; i < nbLay-1; i++)
     {
         Lay lay = nN.lays[i];
         for (int j = 0; j < lay.nbNeu; j++)
@@ -73,9 +74,9 @@ void Save(NN* nNp, char* path)
         fputc((char)'\n',fp);
     }
     // Save output layer with only biais
-    for (int j = 0; j < nN.lays[nN.nbLay-1].nbNeu; j++)
+    for (int j = 0; j < nN.lays[nbLay-1].nbNeu; j++)
     {
-        Neu neu = nN.lays[nN.nbLay-1].neus[j];
+        Neu neu = nN.lays[nbLay-1].neus[j];
         PutFloatFP(neu.bias, fp);
         fputc((char)'\n',fp);
     }
@@ -96,8 +97,11 @@ float LoadNextFloat(FILE* fp)
     float f = 0;
     int decimal = 0;
     int nbDecimal = 0;
+    int sign = 1;
     while((c = fgetc(fp)) != ',') {
-        if(c == '.') 
+        if(c == '-')
+            sign = -1;
+        else if(c == '.') 
             decimal = 1;
         else {
             if(decimal)
@@ -106,7 +110,7 @@ float LoadNextFloat(FILE* fp)
             f += c-'0';
         }
     }
-    f = f/(pow(10,nbDecimal));
+    f = sign * (f/(pow(10,nbDecimal)));
     return f;
 }
 

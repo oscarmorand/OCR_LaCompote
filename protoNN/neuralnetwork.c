@@ -42,6 +42,7 @@ Neu CreateNeuron(int nbrWeights)
     neuron.actv = 0.0f;
     neuron.bias = 0.0f;
     neuron.outWeights = (float*) malloc(nbrWeights * sizeof(float));
+    neuron.dw = (float*) malloc(nbrWeights * sizeof(float));
 
     return neuron;
 }
@@ -99,6 +100,7 @@ void DestroyNN(NN* nNp)
         for (int j = 0; j < nN.nbNeus[i]; j++)
         {
             free(nN.lays[i].neus[j].outWeights);
+            free(nN.lays[i].neus[j].dw);
         }
         free(nN.lays[i].neus);
     }
@@ -112,9 +114,8 @@ float Sigmoid(float x) {
 }
 
 float Relu(float x) {
-    if(x < 0) {
+    if(x < 0)
         return 0;
-    }
     return x;
 }
 
@@ -134,22 +135,33 @@ void ForwardProp(NN* nNp)
             nN.lays[i].neus[j].v = nN.lays[i].neus[j].bias;             // first term of the formula is the biais
 
             for (k = 0; k < nbNeus[i-1]; k++)                           // for each neuron of the previous layer
-            {
                 // add to the value the activated value of the previous neuron multiplicated by the weight of the connection
                 nN.lays[i].neus[j].v += ((nN.lays[i-1].neus[k].outWeights[j]) * (nN.lays[i-1].neus[k].actv));
-            }
             
             // Relu activation function for hidden layers
-            if(i < nbLay - 1) {
+            if(i < nbLay - 1)
                 nN.lays[i].neus[j].actv = Relu(nN.lays[i].neus[j].v);
-            }
 
             // Sigmoid activation function for output layer
-            else {
+            else
                 nN.lays[i].neus[j].actv = Sigmoid(nN.lays[i].neus[j].v);
-            }
         }
     }
+}
+
+int TestResults(NN* nNp, float* expOut) 
+{
+    NN nN = *nNp;
+    for (int i = 0; i < nN.nbNeus[nN.nbLay-1]; i++)
+    {
+        //printf("output: %.0f, expected output: %.0f\n", round(nN.lays[nN.nbLay-1].neus[i].actv), expOut[i]);
+        if(round(nN.lays[nN.nbLay-1].neus[i].actv) != expOut[i]) {
+            //printf("faux!\n");
+            return 0;
+        }
+    }
+    //printf("c'est bon!\n");
+    return 1;
 }
 
 void BackwardProp(NN* nNp, float* expOut)
@@ -157,17 +169,70 @@ void BackwardProp(NN* nNp, float* expOut)
     NN nN = *nNp;
     int* nbNeus = nN.nbNeus;
     int nbLay = nN.nbLay;
-
     int i,j,k;
 
+    // Output Layer
     for (j = 0; j < nbNeus[nbLay-1]; j++)
     {
-        //nNp.lays[nbLay-1].neus[j].dz = ()
-        printf("output n°%i, le resultat est %.2f et devrait etre %.2f\n",j, nN.lays[nbLay-1].neus[j].actv, expOut[j]);
+        double dv = nN.lays[nbLay-1].neus[j].actv - expOut[j];
+        dv *= nN.lays[nbLay-1].neus[j].actv;
+        dv *= (1 - nN.lays[nbLay-1].neus[j].actv);
+        nN.lays[nbLay-1].neus[j].dv = dv;
+
+        for (k = 0; k < nbNeus[nbLay-2]; k++)
+        {
+            nN.lays[nbLay-2].neus[k].dw[j] = nN.lays[nbLay-1].neus[j].dv * nN.lays[nbLay-2].neus[k].actv;
+            nN.lays[nbLay-2].neus[k].dactv = nN.lays[nbLay-2].neus[k].outWeights[j] * nN.lays[nbLay-1].neus[j].dv;
+        }
+
+        nN.lays[nbLay-1].neus[j].dbias = nN.lays[nbLay-1].neus[j].dv;
     }
-    
+
+    // Hidden Layers
+    for(i = nbLay-2; i > 0; i--)
+    {
+        for(j = 0; j < nbNeus[i]; j++)
+        {
+            if(nN.lays[i].neus[j].v >= 0)
+                nN.lays[i].neus[j].dv = nN.lays[i].neus[j].dactv;
+            else
+                nN.lays[i].neus[j].dv = 0;
+
+            for(k = 0; k < nbNeus[i-1]; k++)
+            {
+                nN.lays[i-1].neus[k].dw[j] = nN.lays[i].neus[j].dv * nN.lays[i-1].neus[k].actv;    
+                
+                if(i>1)
+                    nN.lays[i-1].neus[k].dactv = nN.lays[i-1].neus[k].outWeights[j] * nN.lays[i].neus[j].dv;
+            }
+
+            nN.lays[i].neus[j].dbias = nN.lays[i].neus[j].dv;
+        }
+    }
 }
 
+void UpdateWeights(NN* nNp, float lR) 
+{
+    NN nN = *nNp;
+    int* nbNeus = nN.nbNeus;
+    int nbLay = nN.nbLay;
+    int i,j,k;
+
+    for(i = 0; i < nbLay-1; i++)
+    {
+        for(j = 0; j < nbNeus[i]; j++)
+        {
+            for(k = 0; k < nbNeus[i+1]; k++)
+            {
+                // Update Weights
+                nN.lays[i].neus[j].outWeights[k] -= (lR * nN.lays[i].neus[j].dw[k]);
+            }
+            
+            // Update Bias
+            nN.lays[i].neus[j].bias -= (lR * nN.lays[i].neus[j].dbias);
+        }
+    }
+}
 
 void RandShuffle(int *array, int size)
 {
@@ -183,32 +248,49 @@ void RandShuffle(int *array, int size)
     }
 }
 
-void Train(NN* nNp, int nbTraining) 
+void printArray(int array[], size_t len) 
+{
+    printf("[");
+    for (size_t i = 0; i < len-1; i++)
+    {
+        printf("%i,",array[i]);
+    }
+    printf("%i]\n",array[len-1]);
+}
+
+void Train(NN* nNp, int nbTraining, float learningRate) 
 {
     float tInputsSet[4][2] = {{0.0f,0.0f},{0.0f,1.0f},{1.0f,0.0f},{1.0f,1.0f}};
     float tOutputsSet[4][1] = {{0.0f},{1.0f},{1.0f},{0.0f}};
+    int nbWin = 0;
+    int train, j;
 
-    for (int train = 0; train < nbTraining; train++)
+    for (train = 0; train < nbTraining; train++)
     {
-        printf("Training number %i\n", train);
+        //printf("Training number %i\n", train);
         int trainingOrder[4] = {0,1,2,3};
         RandShuffle(trainingOrder, 4);
 
-        for (int j = 0; j < 4; j++)
+        for (j = 0; j < 4; j++)
         {
             int i = trainingOrder[j];
             float* tInputs = tInputsSet[i];
-            float* tOutput = tOutputsSet[i];
+            float* tOutputs = tOutputsSet[i];
 
-            printf(" %i -> inputs are %.2f and %.2f\n", j, tInputs[0], tInputs[1]);
+            //printf("inputs are %.0f and %.0f\n", tInputs[0], tInputs[1]);
 
             InitInputs(nNp, tInputs);
 
             ForwardProp(nNp);
 
-            BackwardProp(nNp, tOutput);
-        }
+            nbWin += TestResults(nNp, tOutputs);
 
-        printf("\n");
+            BackwardProp(nNp, tOutputs);
+            UpdateWeights(nNp, learningRate);
+
+            //printf("\n");
+        }
     }
+    float winPercentage = (((float)nbWin) / ((float)(train*4 + j + 1))) * 100.0f;
+    printf("Percentage of good predictions: %.3f%%\n", winPercentage);
 }
