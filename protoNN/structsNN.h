@@ -9,9 +9,9 @@ typedef struct neu_t
 	float v;
 
 	float dactv;
-	float *dw;
+	float* dw;
 	float dbias;
-	float dz;
+	float dv;
   
 } Neu;
 
