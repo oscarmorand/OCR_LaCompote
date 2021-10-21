@@ -4,12 +4,13 @@
 #include "pixel_operations.h"
 
 /* hough transform function */
-void houghTransform(int** *matrix, int x, int y)
+void houghTransform(int** matrix, int x, int y)
 {
-    for (int O = 0; O < 180; O++)
+    for (int O = 0; O < 90; O++)
     {
-        int r = (int) (x*cos(O) + y*sin(O));
-        matrix[O][r] += 1;
+        double thet = (M_PI /180) * O;
+        int r = (int) (x*cos(thet) + y*sin(thet));
+        matrix[r][O] += 1;
     }
     
 }
@@ -22,9 +23,9 @@ void maxMat(int *theta, int *rho, int** matrix, int thetaSize, int rhoSize)
     {
         for (int O = 0; O < thetaSize; O++)
         {
-            if (max < matrix[O][r])
+            if (max < matrix[r][O])
             {
-                max = matrix[O][r];
+                max = matrix[r][O];
                 *theta = O;
                 *rho = r;
             }
@@ -39,7 +40,7 @@ int main()
     SDL_Surface* image_surface;
     SDL_Surface* screen_surface;
 
-    //init_sdl;
+    init_sdl();
 
     image_surface = load_image("sudoku.png");
     screen_surface = display_image(image_surface);
@@ -52,11 +53,11 @@ int main()
     int maxLength = sqrt(width*width + height*height);
 
     //Allocate memory for the matrix
-    int **MatTransform = malloc(maxLength * sizeof(int));
+    int** MatTransform = malloc(maxLength * sizeof(int*));
     for(int i = 0; i < maxLength; ++i)
     {
         MatTransform[i] = malloc(180*sizeof(int));
-    } 
+    }
 
     //Init all matrix value on 0
     //MatTransform[180][maxLength];
@@ -64,7 +65,7 @@ int main()
     {
         for (int j = 0; j < maxLength; j++)
         {
-            MatTransform[i][j] = 0;
+            MatTransform[j][i] = 0;
         }
     }
 
@@ -78,7 +79,7 @@ int main()
             SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
             if (r <= 100)//r = g = b, check if pixel is black
             {
-                houghTransform(&MatTransform, j, i);
+                houghTransform(MatTransform, j, i);
             }
         }
     }
@@ -101,5 +102,11 @@ int main()
     SDL_FreeSurface(image_surface);
     SDL_FreeSurface(screen_surface);
     
+    for(int i = 0; i < maxLength; ++i)
+    {
+        free(MatTransform[i]);
+    } 
+    free(MatTransform);
+
     return 0;
 }
