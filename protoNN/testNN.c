@@ -3,6 +3,7 @@
 #include <err.h> 
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include "neuralnetwork.h"
 #include "printNN.h"
@@ -10,8 +11,10 @@
 
 int main(int argc, char *argv[])
 {
-	int nbTraining = 10000;
-	float learningRate = 0.5f;
+	srand(time(NULL));
+
+	int nbTraining = 100000;
+	float learningRate = 0.1f;
 	if(argc > 1) 
 	{
 		nbTraining = atoi(argv[1]);
@@ -23,9 +26,15 @@ int main(int argc, char *argv[])
 	int nbrNeurones[] = {2,2,1};
 
 	NN nN = CreateNN(nbrLayers, nbrNeurones);
-	//PrintNN(nN);
+	//NN nN = Load("perfectNN.txt");
+
+	PrintNN(nN);
 
 	Train(&nN,nbTraining, learningRate);
+
+	Train(&nN, 10, 0);
+
+	PrintNN(nN);
 
 	//Save and Load
 

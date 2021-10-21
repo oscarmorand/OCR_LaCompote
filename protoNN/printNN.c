@@ -25,7 +25,7 @@ void PrintNN(NN nN)
         PrintWeights(lays[0].neus[j], lays[1].nbNeu);
         printf("   ");
     }
-    printf("\nHidden layer\n");
+    printf("\nHidden layers\n");
     for (int i = 1; i < nbLay-1; i++)
     {
         for (int j = 0; j < nbNeus[i]; j++) {
@@ -33,6 +33,7 @@ void PrintNN(NN nN)
             PrintWeights(lays[i].neus[j], lays[i+1].nbNeu);
             printf("   ");
         }
+        printf("\n");
     }
     printf("\nOutput layer\n");
     for (int j = 0; j < nbNeus[nbLay-1]; j++)
