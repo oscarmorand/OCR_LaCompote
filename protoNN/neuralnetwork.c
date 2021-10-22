@@ -8,7 +8,7 @@
 
 // Return a random weight between 0.0 and 1.0
 float rndWeight() {
-    return (((float)rand()) / ((float)RAND_MAX)) * 6 - 3; 
+    return (((float)rand()) / ((float)RAND_MAX)); 
 }
 
 void InitWeights(NN* nNp) 
@@ -43,8 +43,10 @@ Neu CreateNeuron(int nbrWeights)
     neuron.v = 0.0f;
     neuron.actv = 0.0f;
     neuron.bias = 0.0f;
+    neuron.dbiasTot = 0.0f;
     neuron.outWeights = (float*) malloc(nbrWeights * sizeof(float));
     neuron.dw = (float*) malloc(nbrWeights * sizeof(float));
+    neuron.dwTot = (float*) malloc(nbrWeights * sizeof(float));
 
     return neuron;
 }
@@ -73,9 +75,6 @@ NN CreateNN(int nbLay, int nbNeus[])
         nN.nbNeus[i] = nbNeus[i];
         nN.lays[i] = CreateLayer(nbNeus[i]);
 
-        //printf("Created layer number %i\n", i+1);
-        //printf("Number of Neurons in layer %i: %i\n", i+1, nN.lays[i].nbNeu);
-
         for (j = 0; j < nbNeus[i]; j++)
         {
             if(i < nbLay-1) 
@@ -83,11 +82,8 @@ NN CreateNN(int nbLay, int nbNeus[])
             else
                 nN.lays[i].neus[j] = CreateNeuron(0);
 
-            //printf("Neuron %i in layer %i created\n", j+1, i+1);
-        }
-        //printf("\n"); 
+        } 
     }
-    //printf("\n");
 
     InitWeights(&nN);
 
@@ -103,6 +99,7 @@ void DestroyNN(NN* nNp)
         {
             free(nN.lays[i].neus[j].outWeights);
             free(nN.lays[i].neus[j].dw);
+            free(nN.lays[i].neus[j].dwTot);
         }
         free(nN.lays[i].neus);
     }
@@ -151,6 +148,8 @@ void ForwardProp(NN* nNp)
     }
 }
 
+
+
 float QuadCostFunc(Lay* outputLayer, float* expOuts) 
 {
     float sum = 0.0f;
@@ -167,6 +166,7 @@ float dCost(float output, float expOut)
     return 2 * (output - expOut);
 }
 
+
 void BackwardProp(NN* nNp, float* expOut)
 {
     NN nN = *nNp;
@@ -174,24 +174,6 @@ void BackwardProp(NN* nNp, float* expOut)
     int nbLay = nN.nbLay;
     Lay* lays = nN.lays;
     int i,j,k;
-
-    /*
-    // Output Layer
-    for (j = 0; j < nbNeus[nbLay-1]; j++)
-    {
-        double dv = nN.lays[nbLay-1].neus[j].actv - expOut[j];
-        dv *= nN.lays[nbLay-1].neus[j].actv;
-        dv *= (1 - nN.lays[nbLay-1].neus[j].actv);
-        nN.lays[nbLay-1].neus[j].dv = dv;
-
-        for (k = 0; k < nbNeus[nbLay-2]; k++)
-        {
-            nN.lays[nbLay-2].neus[k].dw[j] = nN.lays[nbLay-1].neus[j].dv * nN.lays[nbLay-2].neus[k].actv;
-            nN.lays[nbLay-2].neus[k].dactv = nN.lays[nbLay-2].neus[k].outWeights[j] * nN.lays[nbLay-1].neus[j].dv;
-        }
-
-        nN.lays[nbLay-1].neus[j].dbias = nN.lays[nbLay-1].neus[j].dv;
-    }*/
 
     // Output Layer
 
@@ -205,6 +187,7 @@ void BackwardProp(NN* nNp, float* expOut)
         float dOdi = lays[outputLayer].neus[j].actv * (1 - lays[outputLayer].neus[j].actv);
         // Calculate how much the cost function change when the input change -> product of these two partial derivatives
         float dCdi = dCdO * dOdi;
+        lays[outputLayer].neus[j].dv = dCdi;
 
         // for each neuron of the layer before ouput layer
         for (k = 0; k < nbNeus[outputLayer-1]; k++)
@@ -212,6 +195,7 @@ void BackwardProp(NN* nNp, float* expOut)
             // Calculate how much the input change when the weight change -> d(O*w + b)/dw = O -> only the output of previous layer
             float didw = lays[outputLayer-1].neus[k].actv;
             lays[outputLayer-1].neus[k].dw[j] = dCdi * didw;
+            lays[outputLayer-1].neus[k].dwTot[j] += lays[outputLayer-1].neus[k].dw[j];
 
             // Calculate how much the inut change when the output of previous layer neuron change -> d(Ow+b)/dO = w -> only the weight of previous layer
             float didOh = lays[outputLayer-1].neus[k].outWeights[j];
@@ -219,10 +203,11 @@ void BackwardProp(NN* nNp, float* expOut)
         }
 
         lays[outputLayer].neus[j].dbias = dCdi;
+        lays[outputLayer].neus[j].dbiasTot += lays[outputLayer].neus[j].dbias;
     }
     
-
     // Hidden Layers
+
     for(i = nbLay-2; i > 0; i--)
     {
         for(j = 0; j < nbNeus[i]; j++)
@@ -235,17 +220,19 @@ void BackwardProp(NN* nNp, float* expOut)
             for(k = 0; k < nbNeus[i-1]; k++)
             {
                 nN.lays[i-1].neus[k].dw[j] = nN.lays[i].neus[j].dv * nN.lays[i-1].neus[k].actv;    
+                nN.lays[i-1].neus[k].dwTot[j] += nN.lays[i-1].neus[k].dw[j];  
                 
                 if(i>1)
                     nN.lays[i-1].neus[k].dactv = nN.lays[i-1].neus[k].outWeights[j] * nN.lays[i].neus[j].dv;
             }
 
             nN.lays[i].neus[j].dbias = nN.lays[i].neus[j].dv;
+            nN.lays[i].neus[j].dbiasTot += nN.lays[i].neus[j].dbias;
         }
     }
 }
 
-void UpdateWeights(NN* nNp, float lR) 
+void UpdateWeights(NN* nNp, float lR, int nbTests) 
 {
     NN nN = *nNp;
     int* nbNeus = nN.nbNeus;
@@ -259,11 +246,11 @@ void UpdateWeights(NN* nNp, float lR)
             for(k = 0; k < nbNeus[i+1]; k++)
             {
                 // Update Weights
-                nN.lays[i].neus[j].outWeights[k] -= (lR * nN.lays[i].neus[j].dw[k]);
+                nN.lays[i].neus[j].outWeights[k] -= ((lR * nN.lays[i].neus[j].dwTot[k])/nbTests);
             }
             
             // Update Bias
-            nN.lays[i].neus[j].bias -= (lR * nN.lays[i].neus[j].dbias);
+            nN.lays[i].neus[j].bias -= ((lR * nN.lays[i].neus[j].dbiasTot)/nbTests);
         }
     }
 }
@@ -282,16 +269,6 @@ void RandShuffle(int *array, int size)
     }
 }
 
-void printArray(int array[], size_t len) 
-{
-    printf("[");
-    for (size_t i = 0; i < len-1; i++)
-    {
-        printf("%i,",array[i]);
-    }
-    printf("%i]\n",array[len-1]);
-}
-
 float roundFromZeroToOne(float x) 
 {
     if(x < 0.6f)
@@ -304,56 +281,57 @@ int TestResults(NN* nNp, float* expOut)
     NN nN = *nNp;
     for (int i = 0; i < nN.nbNeus[nN.nbLay-1]; i++)
     {
-        //printf("output: %.0f, expected output: %.0f", nN.lays[nN.nbLay-1].neus[i].actv, expOut[i]);
-        if(roundFromZeroToOne(nN.lays[nN.nbLay-1].neus[i].actv) != expOut[i]) {
-            //printf(" faux!\n");
+        if(roundFromZeroToOne(nN.lays[nN.nbLay-1].neus[i].actv) != expOut[i])
             return 0;
-        }
     }
-    //printf(" vrai!\n");
     return 1;
 }
 
-void SetValuesToZero(NN* nNp) {
+void SetValuesToZero(NN* nNp, int resTot) {
     NN nN = *nNp;
     int* nbNeus = nN.nbNeus;
     int nbLay = nN.nbLay;
-    int i,j;
+    int i,j,k;
 
-    for(i = 1; i < nbLay-1; i++)
+    for(i = 0; i < nbLay; i++)
     {
         for(j = 0; j < nbNeus[i]; j++)
         {
             nN.lays[i].neus[j].v = 0.0f;
             nN.lays[i].neus[j].actv = 0.0f;
+            nN.lays[i].neus[j].dv = 0.0f;
+            nN.lays[i].neus[j].dactv = 0.0f;
+            if(resTot) {
+                if(i < nbLay -1) 
+                {
+                    for (k = 0; k < nbNeus[i+1]; k++)
+                        nN.lays[i].neus[j].dwTot[k] = 0.0f;
+                }
+                nN.lays[i].neus[j].dbiasTot = 0.0f;
+            }
         }
     }
 }
 
-void Train(NN* nNp, int nbTraining, float learningRate) 
+float Train(NN* nNp, int nbTraining, float learningRate) 
 {
     float tInputsSet[4][2] = {{0.0f,0.0f},{0.0f,1.0f},{1.0f,0.0f},{1.0f,1.0f}};
     float tOutputsSet[4][1] = {{0.0f},{1.0f},{1.0f},{0.0f}};
-    int nbWin = 0;
-    int nbTot = 0;
+    int nbWin = 0, nbTot = 0, nbTestInTraining = 4;
     int train, j;
 
     for (train = 0; train < nbTraining; train++)
     {
-        //printf("Training number %i\n", train);
         int trainingOrder[4] = {0,1,2,3};
         RandShuffle(trainingOrder, 4);
 
-        for (j = 0; j < 4; j++)
+        for (j = 0; j < nbTestInTraining; j++)
         {
             int i = trainingOrder[j];
             float* tInputs = tInputsSet[i];
             float* tOutputs = tOutputsSet[i];
 
-            //printf("inputs are %.0f and %.0f\n", tInputs[0], tInputs[1]);
-
             InitInputs(nNp, tInputs);
-            SetValuesToZero(nNp);
 
             ForwardProp(nNp);
 
@@ -361,11 +339,13 @@ void Train(NN* nNp, int nbTraining, float learningRate)
             nbTot += 1;
 
             BackwardProp(nNp, tOutputs);
-            UpdateWeights(nNp, learningRate);
-
-            //printf("\n");
+            SetValuesToZero(nNp,0);
         }
+
+        UpdateWeights(nNp, learningRate, nbTestInTraining);
+
+        SetValuesToZero(nNp,1);
     }
     float winPercentage = (((float)nbWin) / ((float)nbTot)) * 100.0f;
-    printf("Percentage of good predictions: %f%%\n", winPercentage);
+    return winPercentage;
 }

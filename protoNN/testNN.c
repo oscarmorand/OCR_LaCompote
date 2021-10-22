@@ -31,8 +31,14 @@ int main(int argc, char *argv[])
 	PrintNN(nN);
 
 	Train(&nN,nbTraining, learningRate);
-
-	Train(&nN, 10, 0);
+	float winPercentage = Train(&nN, 10, 0);
+	while(winPercentage != 100.0f) {
+		DestroyNN(&nN);
+		nN = CreateNN(nbrLayers, nbrNeurones);
+		Train(&nN,nbTraining, learningRate);
+		winPercentage = Train(&nN, 10, 0);
+	}
+	printf("Percentage of good predictions: %f%%\n", winPercentage);
 
 	PrintNN(nN);
 
