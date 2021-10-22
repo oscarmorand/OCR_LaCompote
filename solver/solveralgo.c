@@ -65,7 +65,7 @@ int RecSolve(int line, int col, int empty, char grid[][9])
                 grid[line][col] = nbr;                                              // we put the number in the box
 
                 if(RecSolve(nextLine, nextCol, Empty(nextLine, nextCol, grid), grid) == 0) // if everything is ok 
-                    return 0;                                                              // the we are ok too
+                    return 0;                                                              // then we are ok too
                 else
                     grid[line][col] = 0;                                            // else we try the next number
             }
