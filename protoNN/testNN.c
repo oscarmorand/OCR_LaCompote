@@ -14,6 +14,7 @@ int nbrNeurones[] = {2,2,1};
 
 void Help() 
 {
+	printf("./testNN -help\nor\n");
 	printf("./testNN [Neural network creation mode] [action]\n");
 	printf("[Neural network creation mode]:\n");
 	printf("	-create\n");
@@ -35,13 +36,11 @@ void ErrorArgument()
 void TrainNN(NN* nNp, int nbTraining, float learningRate, char* savePath)
 {
 	NN nN = *nNp;
-	Train(&nN, nbTraining, learningRate);
-	float winPercentage = Train(&nN, 10, 0);
-	while(winPercentage < 98.0f) {
+	float winPercentage = Train(&nN, nbTraining, learningRate);;
+	while(winPercentage < 95.0f) {
 		DestroyNN(&nN);
 		nN = CreateNN(nbrLayers, nbrNeurones);
-		Train(&nN, nbTraining, learningRate);
-		winPercentage = Train(&nN, 10, 0);
+		winPercentage = Train(&nN, nbTraining, learningRate);
 	}
 	printf("Percentage of good predictions: %f%%\n", winPercentage);
 
