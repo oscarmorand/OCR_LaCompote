@@ -92,7 +92,7 @@ int main()
             {
                 //houghTransform(MatTransform, x, y, maxLength/2);
 
-                for (int O = 1; O < 180; O++)
+                for (int O = 0; O < 180; O++)
                 {
                     double thet = (M_PI /180) * O;
                     int r = (x*cos(thet) + y*sin(thet));
@@ -107,57 +107,61 @@ int main()
     //draw a red line 
     int stop = 0;
     /*while (stop == 0)//*/
-    for (size_t i = 0; i < 28; i++)
+    while (stop == 0)
     {
         //repeat while there are max values
         int theta = 0;
         int rho = 0;
         // draw lines that are 50% the size of the image min
-        maxMat(&stop, &theta, &rho, MatTransform, 180, maxLength, 100);
+        maxMat(&stop, &theta, &rho, MatTransform, 180, maxLength, 220);
         int max = MatTransform[rho][theta];
 
         MatTransform[rho][theta] = 0;
         rho -= maxLength/2;
-
-        int changeMode = 0;
-        if (theta == 179 || theta == 91 || theta == 1) //case were infinite value
-        {
-            changeMode = 1;
-            theta = 0;
-        }
         
         printf("max is = %d in coord rho = %d and theta = %d : cos(O) = %f\n",max, rho, theta, cos(theta * M_PI/180));
         double O = theta * M_PI/180;
 
-        Uint32 pixel = SDL_MapRGB(image_surface->format, 255, 0, 0);
-        
-        if (changeMode)
+        if (O != 0 && rho >= 0 && max != 0)
+        {   
+            //double O = theta * M_PI/180;
+            
+            // Uint32 pixel = SDL_MapRGB(image_surface->format, 255, 0, 0);
+            for (int x = 0; x < width; x++)
+            {
+                float y = ((-x*cos(O))/sin(O)) + rho/sin(O);
+                //printf("(%d , %lf) : cos(O) = %f\n", x,y, cos(O));  
+                if (1)
+                {             
+                    Uint32 pixel = get_pixel(image_surface, x, y);
+                    Uint8 r, g, b;
+                    SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
+                    pixel = SDL_MapRGB(image_surface->format, r + 120, g, b);
+                    put_pixel(image_surface, x, y, pixel);
+                    update_surface(screen_surface, image_surface);    
+                }
+            }
+        }
+        else if (O == 0 && max != 0)
         {
+            
+            // Uint32 pixel = SDL_MapRGB(image_surface->format, 0, 255, 0);
             for (int y = 0; y < height; y++)
             {
-                double x = ((-y*sin(O))/cos(O)) + rho/cos(O);
-                printf("(%d , %lf) : cos(O) = %f\n", y,x, cos(O));
-            
-                put_pixel(image_surface, abs((int) x), abs(y), pixel);
-                update_surface(screen_surface, image_surface);
+                if (rho >= 0)
+                {
+                    float x = rho;//((-y*sin(O))/cos(O)) + rho/cos(O);
+                    //printf("(%lf , %d) : cos(O) = %f\n", x,y, cos(O));
+                    Uint32 pixel = get_pixel(image_surface, x, y);
+                    Uint8 r, g, b;
+                    SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
+                    pixel = SDL_MapRGB(image_surface->format, r +120, g , b);
+                    put_pixel(image_surface, abs((int) x), abs(y), pixel);
+                    update_surface(screen_surface, image_surface);
+                }
             
             }
         }
-        else
-
-            for (int x = 0; x < width; x++)
-            {
-                double y = ((-x*cos(O))/sin(O)) + rho/sin(O);
-                //printf("(%d , %lf) : cos(O) = %f\n", x,y, cos(O));  
-                Uint32 thisPix = get_pixel(image_surface, x, y);
-                Uint8 r, g, b;
-                SDL_GetRGB(thisPix, image_surface->format, &r, &g, &b);
-                if (r <= 100 && b <= 100 && g <= 100)
-                {             
-                    put_pixel(image_surface, x, y, pixel);
-                    update_surface(screen_surface, image_surface);    
-                }       
-            }
     }
 
     update_surface(screen_surface, image_surface);
