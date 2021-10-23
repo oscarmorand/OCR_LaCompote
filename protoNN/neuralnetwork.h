@@ -20,6 +20,8 @@ void ForwardProp(NN* nNp);
 
 void BackwardProp(NN* nNp, float* expOut);
 
+float roundFromZeroToOne(float x);
+
 float Train(NN* nNp, int nbTraining, float learningRate);
 
 #endif
