@@ -12,6 +12,9 @@ typedef struct neu_t
 	float* dw;
 	float dbias;
 	float dv;
+
+	float* dwTot;
+	float dbiasTot;
   
 } Neu;
 

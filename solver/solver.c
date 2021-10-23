@@ -53,10 +53,9 @@ int main(int argc, char *argv[])
 
     printf("Avant remplissage:\n");
     PrintGrid(size, grid);
-    printf("\n");
 
-    //Parsing
-    Parse(fileName,grid);
+    //Loading (Parsing)
+    Load(fileName,grid);
 
     printf("Apres remplissage:\n");
     PrintGrid(size, grid);
@@ -66,6 +65,9 @@ int main(int argc, char *argv[])
 
     printf("Apres resolution\n");
     PrintGrid(size, grid);
+
+    //Saving
+    Save(fileName, grid);
 
     return 0;
 }
