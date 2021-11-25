@@ -7,9 +7,8 @@
 #include "saveandload.h"
 #include "structsNN.h"
 #include "printNN.h"
-#include "sdlNN.h"
+#include "basic_sdl.h"
 
-#define BASE_FILENAME "x0y0.png"
 #define SIZE_IMAGE 28
 
 int nbrLayers = 5;
@@ -53,7 +52,7 @@ char determine_digit(SDL_Surface* image, NN* nNp)
     return maxDigit;
 }
 
-void fill_grid(size_t n, char** grid)
+void fill_grid(size_t n, char** grid, SDL_Surface** images)
 {
     NN nN = CreateNN(nbrLayers, nbrNeurones);
 
@@ -61,24 +60,17 @@ void fill_grid(size_t n, char** grid)
     {
         for (size_t x = 0; x < n; x++)
         {
-            char fileName[] = BASE_FILENAME;
-            fileName[1] = (char)(x+'0');
-            fileName[3] = (char)(y+'0');
+            SDL_Surface* image = images[y*n+x];
+            printf("%i,%i ", image->w, image->h);
 
-            printf("%s\n", fileName);
+            /*char digit = determine_digit(image, &nN);
+            grid[y][x] = digit;*/
 
-            /*
-            SDL_Surface* image_surface;
-            image_surface = load_image(fileName);
-
-            char digit = determine_digit(image_surface, &nN);
-            grid[y][x] = digit;
-
-            SDL_FreeSurface(image_surface);
-            */
+            SDL_FreeSurface(image);
         }
     }
     printf("\n");
 
+    free(images);
     DestroyNN(&nN);
 }

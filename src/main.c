@@ -1,5 +1,11 @@
 #include <gtk/gtk.h>
 
+// SDL
+#include "basic_sdl.h"
+
+// DETECT LINES AND SEGMENTATION
+#include "cut.h"
+
 // SOLVER
 #include "parser.h"
 #include "solver.h"
@@ -51,10 +57,16 @@ void on_rightRotation_clicked(GtkButton *button, gpointer user_data)
 
 void on_buttonSolve_clicked(GtkButton *button, gpointer user_data)
 {
+    SDL_Surface* image = load_image("images/test4.png");
+
+	SDL_Surface** images = nb_cropout(image);
+	
+	SDL_FreeSurface(image);
+
     char** grid = init_grid(GRID_SIZE);
 
     // fill grid with recognition of digits in the images
-    fill_grid(GRID_SIZE, grid);
+    fill_grid(GRID_SIZE, grid, images);
 
     g_print("Apres remplissage\n");
     print_grid(GRID_SIZE, grid);
@@ -76,8 +88,9 @@ void on_buttonSolve_clicked(GtkButton *button, gpointer user_data)
 
 int main(int argc, char *argv[])
 {
-    // Initializes GTK.
+    // Initializes GTK and sdl
     gtk_init(NULL, NULL);
+    init_sdl();
 
     // Constructs a GtkBuilder instance.
     GtkBuilder* builder = gtk_builder_new ();
