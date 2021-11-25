@@ -3,7 +3,39 @@
 #include <err.h>
 #include <string.h>
 
-void Load(char *fileName, char grid[][9])
+void print_grid(int n, char** grid)
+{
+    int i,j;
+    for(i = 0; i < n; i++){
+        for(j = 0; j < n; j++){
+            if(j%3 == 0)
+                printf("  ");
+            printf("%hhu ", grid[i][j]);
+        }
+        printf("\n");
+        if((i+1)%3 == 0)
+                printf("\n");
+    }
+}
+
+char** init_grid(size_t n)
+{
+    char** grid = (char**)malloc(n * sizeof(char*));
+    for (size_t i = 0; i < n; i++)
+    {
+        grid[i] = (char*)calloc(n, sizeof(char));
+    }
+    return grid;
+}
+
+void free_grid(size_t n, char** grid) 
+{
+    for (size_t i = 0; i < n; i++)
+        free(grid[i]);
+    free(grid);
+}
+
+char** Load(size_t n, char *fileName)
 {
     FILE *filePtr = NULL;
 
@@ -12,6 +44,8 @@ void Load(char *fileName, char grid[][9])
     if(filePtr == NULL) {
         errx(1,"solver/parser.c/Load() : cannot open file\n");
     }
+
+    char** grid = init_grid(n);
 
     //Fill grid
     char c, value;
@@ -25,6 +59,7 @@ void Load(char *fileName, char grid[][9])
                     value = 0;
                     if (c >= (char)'0' && c <= (char)'9')
                         value = c - (char)'0';
+                    printf("%i,%i ", i, j);
                     grid[i][j] = value;
                     j = j + 1;
                 }
@@ -41,6 +76,8 @@ void Load(char *fileName, char grid[][9])
     int closeReturn = fclose(filePtr);
     if(closeReturn == (int) EOF)
         errx(1,"solver/parser.c/Load() : error in closing the file");
+
+    return grid;
 }
 
 void outFormatPath(char* fileName, char* outFileName) 
@@ -51,7 +88,7 @@ void outFormatPath(char* fileName, char* outFileName)
     strcat(outFileName,format);
 }
 
-void Save(char *fileName, char grid[][9]) 
+void Save(char *fileName, char** grid) 
 {
     char outFileName[100];
     outFormatPath(fileName, outFileName);

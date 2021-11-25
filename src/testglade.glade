@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="3.12"/>
+  <object class="GtkFileFilter" id="imageFilter">
+    <mime-types>
+      <mime-type>image/png</mime-type>
+      <mime-type>image/jpeg</mime-type>
+    </mime-types>
+    <patterns>
+      <pattern>*.png</pattern>
+      <pattern>*.jpeg</pattern>
+    </patterns>
+  </object>
+  <object class="GtkWindow" id="window">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkFixed" id="grid1">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkButton" id="buttonChoose">
+            <property name="label" translatable="yes">Choose this image</property>
+            <property name="width-request">275</property>
+            <property name="height-request">49</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <signal name="clicked" handler="on_button1_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">26</property>
+            <property name="y">81</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttonSolve">
+            <property name="label" translatable="yes">Solve Sudoku</property>
+            <property name="width-request">139</property>
+            <property name="height-request">137</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <signal name="clicked" handler="on_buttonSolve_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">190</property>
+            <property name="y">415</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFileChooserButton" id="fileLoad">
+            <property name="width-request">263</property>
+            <property name="height-request">42</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="filter">imageFilter</property>
+            <property name="title" translatable="yes">Load an image</property>
+            <signal name="file-set" handler="on_fileLoad_file_set" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">31</property>
+            <property name="y">23</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="leftRotation">
+            <property name="label" translatable="yes">left rotation</property>
+            <property name="width-request">117</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <signal name="clicked" handler="on_leftRotation_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">54</property>
+            <property name="y">276</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="rightRotation">
+            <property name="label" translatable="yes">right rotation</property>
+            <property name="width-request">125</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <signal name="clicked" handler="on_rightRotation_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="x">187</property>
+            <property name="y">276</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

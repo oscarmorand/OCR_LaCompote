@@ -32,7 +32,7 @@ void PutIntFP(int x, FILE* fp)
     free(s);
 }
 
-void Save(NN* nNp, char* path) 
+void SaveNN(NN* nNp, char* path) 
 {
     if(path == NULL)
         path = "savedNN.txt";
@@ -125,7 +125,7 @@ int LoadNextInt(FILE* fp)
     return x;
 }
 
-NN Load(char* path) 
+NN LoadNN(char* path) 
 {
     if(path == NULL)
         path = "savedNN.txt";

@@ -44,7 +44,7 @@ void TrainNN(NN* nNp, int nbTraining, float learningRate, char* savePath)
 	}
 	printf("Percentage of good predictions: %f%%\n", winPercentage);
 
-	Save(nNp,savePath);
+	SaveNN(nNp,savePath);
 	DestroyNN(nNp);
 }
 
@@ -90,14 +90,14 @@ int main(int argc, char *argv[])
 			// Save the randomly generated network
 			if(argc == 3) {
 				savePath = argv[2];
-				Save(&nN, savePath);
+				SaveNN(&nN, savePath);
 				DestroyNN(&nN);
 			}
 		}
 		// Load an existing neural network
 		else if(strcmp(argv[1], "-load") == 0) {
 			char* loadPath = argv[2];
-			nN = Load(loadPath);
+			nN = LoadNN(loadPath);
 			supArg = 1;
 		}
 		else

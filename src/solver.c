@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int LineOk(char nbr, int line, char grid[][9]) 
+int LineOk(char nbr, int line, char** grid) 
 {
     for(int j = 0; j < 9; j++) {
         if(grid[line][j] == nbr)
@@ -9,7 +9,7 @@ int LineOk(char nbr, int line, char grid[][9])
     return 1;
 }
 
-int ColumnOk(char nbr, int col, char grid[][9]) 
+int ColumnOk(char nbr, int col, char** grid) 
 {
     for(int i = 0; i < 9; i++) {
         if(grid[i][col] == nbr)
@@ -18,7 +18,7 @@ int ColumnOk(char nbr, int col, char grid[][9])
     return 1;
 }
 
-int SquareOk(char nbr, int line, int col, char grid[][9])
+int SquareOk(char nbr, int line, int col, char** grid)
 {
     char y = (line / 3) * 3;
     char x = (col / 3) * 3;
@@ -33,14 +33,14 @@ int SquareOk(char nbr, int line, int col, char grid[][9])
     return 1;
 }
 
-int Empty(int line, int col, char grid[][9]) 
+int Empty(int line, int col, char** grid) 
 {
     if(line >= 9 || col >= 9)
         return 0;
     return (grid[line][col] == 0);
 }
 
-int RecSolve(int line, int col, int empty, char grid[][9])
+int RecSolve(int line, int col, int empty, char** grid)
 {
     if(line >= 9)
         return 0;
@@ -74,7 +74,7 @@ int RecSolve(int line, int col, int empty, char grid[][9])
     }
 }
 
-void Solve(char grid[][9])
+void Solve(char** grid)
 {
     RecSolve(0, 0, Empty(0, 0, grid), grid);
 }

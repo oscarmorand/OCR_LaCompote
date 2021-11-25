@@ -1,0 +1,42 @@
+#Makefile
+
+CC := gcc
+LD := gcc
+
+CFLAGS := -Wall -Wextra -std=c99 -O3 -fsanitize=address -g `pkg-config --cflags gtk+-3.0`
+CPPFLAGS := -MMD
+LDFLAGS := -fsanitize=address
+LDLIBS := -lm `pkg-config --libs gtk+-3.0`
+
+TARGET := main
+C_FILES := \
+	src/main.c \
+	src/neuralnetwork.c \
+	src/parser.c \
+	src/printNN.c \
+	src/saveandload.c \
+	src/solveralgo.c
+O_FILES := $(C_FILES:src/%.c=obj/%.o)
+D_FILES := $(D_FILES:%.o=%.d)
+
+C_DIRS := $(shell find src -type d)
+$(shell mkdir -p $(C_DIRS:src/%=obj/%))
+
+all: $(TARGET)
+
+clean:
+	rm -rf $(TARGET) obj
+
+.PHONY: all clean
+
+$(TARGET): $(O_FILES)
+	$(LD) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+
+obj/%.o : src/%.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+  
+-include $(D_FILES)
+
+#End
+#src/mainNN.c 
+#src/solver.c
