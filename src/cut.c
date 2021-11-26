@@ -51,6 +51,7 @@ SDL_Surface** nb_cropout(SDL_Surface* surface){
     int height = surface->h;
 
     int i=0;
+    int j=0;
 
     int DEBUG_NB_OF_DOTS = 0;
 
@@ -76,11 +77,15 @@ SDL_Surface** nb_cropout(SDL_Surface* surface){
                     }
                 }
                 DEBUG_NB_OF_DOTS++;
-                SDL_Surface* image = get_RECT(x, y, surface);
-                images[i] = image;
-                i+=1;
+                if (i < 9 && j < 9){
+                    SDL_Surface* image = get_RECT(x, y, surface);
+                    images[j*9 + i] = image;
+                    i+=1;
+                }
             } 
         }
+        i = 0;
+        j+= 1;
     }
     printf("%i dots in this image\n", DEBUG_NB_OF_DOTS);
     //SDL_UnlockSurface(surface);
