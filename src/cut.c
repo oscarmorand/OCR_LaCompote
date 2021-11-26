@@ -7,6 +7,7 @@
 //Input top left corner of rect / computes the final RECT
 // then pass it in BlitSurface
 // then find a way to save it as a new image
+
 SDL_Surface* get_RECT(int srcX, int srcY, SDL_Surface* img){
     int boxW = (img->w)/9;
     int boxH = (img->h)/9;
@@ -50,12 +51,13 @@ SDL_Surface** nb_cropout(SDL_Surface* surface){
     int width = surface->w;
     int height = surface->h;
 
-    int i=0;
+    int i=0; //CNT for x values
+    int j=0; //nb of 9's done
 
     int DEBUG_NB_OF_DOTS = 0;
 
     SDL_Surface** images = (SDL_Surface**)malloc(99 * sizeof(SDL_Surface*));
-
+    
     for (int y = 0; y < height-1; y++){
         for (int x = 0; x < width-1; x++){
             //increments x and y till (x, y) is the last bright red pixel in the zone
@@ -76,11 +78,15 @@ SDL_Surface** nb_cropout(SDL_Surface* surface){
                     }
                 }
                 DEBUG_NB_OF_DOTS++;
-                SDL_Surface* image = get_RECT(x, y, surface);
-                images[i] = image;
-                i+=1;
+                if (i<=9){
+                    SDL_Surface* image = get_RECT(x, y, surface);
+                    images[j*9+i] = image;
+                    i+=1;
+                }
             } 
         }
+        i = 0;
+        j+= 1;
     }
     printf("%i dots in this image\n", DEBUG_NB_OF_DOTS);
     //SDL_UnlockSurface(surface);
